@@ -1,0 +1,33 @@
+{
+  "name": "freckle-slackbot",
+  "version": "1.0.0",
+  "description": "A slackbot to create time tracking entries on freckle.com",
+  "keywords": [
+    "time",
+    "tracking",
+    "slack",
+    "slackbot",
+    "chatbot",
+    "hours"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "author": "Marc Bachmann <marc.brookman@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^3.6.1",
+    "fetch": "^1.1.0",
+    "lodash": "^4.17.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcbachmann/freckle-slackbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/marcbachmann/freckle-slackbot/issues"
+  },
+  "homepage": "https://github.com/marcbachmann/freckle-slackbot#readme"
+}
