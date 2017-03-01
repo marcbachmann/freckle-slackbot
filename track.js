@@ -16,7 +16,7 @@ module.exports = function (entries, projects) {
         project_id: project.id,
         user_id: cmd.user.id,
         minutes: parsed.minutes,
-        date: new Date().toISOString(),
+        date: (cmd.date || new Date()).toISOString(),
         description: parsed.tag
       }
       entries.post(data, function (err, res) {
