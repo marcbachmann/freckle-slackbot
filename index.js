@@ -16,6 +16,7 @@ var CLIENT_EVENTS = slack.CLIENT_EVENTS
 var MemoryDataStore = slack.MemoryDataStore
 var rtm = new RtmClient(SLACK_TOKEN, {logLevel: 'error', dataStore: new MemoryDataStore()})
 var logins = {}
+var dates= {}
 
 function postMessage (target, msg) {
   if (Array.isArray(msg)) msg = msg.join('\n')
@@ -32,16 +33,21 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (data) {
 rtm.on(RTM_EVENTS.MESSAGE, function(msg) {
   if (msg.subtype) return
 
-  var cmd = /^([^ ]*)( .*)?/.exec(msg.text)
-  if (cmd[1] === 'login') {
-    login(msg, cmd)
-  } else if (cmd[1] === 'track') {
-    trackMessage(msg, cmd)
-  } else if (/^projects?$/.test(cmd[1])) {
-    listProjects(msg)
-  } else {
-    help(msg)
-  }
+  _.each(msg.text.split('\n'), function (text) {
+    var cmd = /^([^ ]*)( .*)?/.exec(text)
+
+    if (cmd[1] === 'login') {
+      login(msg, cmd)
+    } else if (cmd[1] === 'track') {
+      trackMessage(msg, cmd)
+    } else if (Date.parse(cmd[0])) {
+      changeDate(msg, cmd[0])
+    } else if (/^projects?$/.test(cmd[1])) {
+      listProjects(msg)
+    } else {
+      help(msg)
+    }
+  })
 })
 
 function login (msg, cmd) {
@@ -71,7 +77,7 @@ function login (msg, cmd) {
 
 function trackMessage (msg, cmd) {
   if (!logins[msg.user]) return notLoggedInMessage(msg)
-  track({user: logins[msg.user], input: cmd[2]}, function (err, res) {
+  track({user: logins[msg.user], input: cmd[2], date: dates[msg.user]}, function (err, res) {
     if (err && /^No /.test(err.message)) postMessage(msg.user, err.message)
     else if (err) postMessage(msg.user, err.stack)
     else postMessage(msg.user, `Tracked ${res.minutes} minutes for '${res.description}' on the project '${res.project}'`)
@@ -90,6 +96,20 @@ function help (msg) {
     'projects                        : Lists all projects',
     '```'
   ])
+}
+
+function changeDate (msg, date) {
+  if (date === 'today') date = undefined
+  else if (date === 'yesterday') date = new Date(Date.now() - (3600 * 1000 * 24))
+  else date = new Date(date)
+
+  if (!date) {
+    delete dates[msg.user]
+    postMessage(msg.user, `Changed date to today`)
+  } else {
+    dates[msg.user] = date
+    postMessage(msg.user, `Changed date to ${date.toISOString()}`)
+  }
 }
 
 function listProjects (msg) {
