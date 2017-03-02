@@ -40,7 +40,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function(msg) {
       login(msg, cmd)
     } else if (cmd[1] === 'track') {
       trackMessage(msg, cmd)
-    } else if (Date.parse(cmd[0])) {
+    } else if (/^(yesterday|today)$/.test(cmd[0]) || Date.parse(cmd[0])) {
       changeDate(msg, cmd[0])
     } else if (/^projects?$/.test(cmd[1])) {
       listProjects(msg)
