@@ -1,5 +1,5 @@
 var assert = require('assert')
-var parser = require('./parser')
+var parser = require('./parse-tracking-input')
 
 var a = parser('3.5h some-customer #foobar test')
 assert.equal(a.minutes, 210)
@@ -44,3 +44,25 @@ assert.equal(parser('1hour 30min').minutes, 90)
 assert.equal(parser('1hours 30 min').minutes, 90)
 assert.equal(parser('1hours 30 minute').minutes, 90)
 assert.equal(parser('1hours 30    minutes').minutes, 90)
+
+
+const parseDateInput = require('./parse-date-input')
+assert.equal(parseDateInput('today'), undefined)
+assert.equal(parseDateInput('yesterday').toISOString(), new Date(Date.now() - 864e5).toISOString())
+assert.equal(parseDateInput('something'), 'Invalid Date')
+
+assert.equal(parseDateInput.isDate('yesterday'), true)
+assert.equal(parseDateInput.isDate('monday'), true)
+assert.equal(parseDateInput.isDate('wednesday'), true)
+assert.equal(parseDateInput.isDate('thursday'), true)
+assert.equal(parseDateInput.isDate('friday'), true)
+assert.equal(parseDateInput.isDate('saturday'), true)
+assert.equal(parseDateInput.isDate('sunday'), true)
+assert.equal(parseDateInput.isDate('last wednesday'), true)
+assert.equal(parseDateInput.isDate('last friday'), true)
+assert.equal(parseDateInput.isDate('2017/03/01'), true)
+assert.equal(parseDateInput.isDate('2017-03-02'), true)
+assert.equal(parseDateInput.isDate('2017-03-foobar'), false)
+assert.equal(parseDateInput.isDate('something'), false)
+
+

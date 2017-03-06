@@ -7,6 +7,7 @@ var entries = fetch('entries', FRECKLE_TOKEN)
 var projects = fetch('projects', FRECKLE_TOKEN)
 var users = fetch('users', FRECKLE_TOKEN)
 var track = require('./track')(entries, projects)
+var parseDateInput = require('./parse-date-input')
 
 // https://my.slack.com/services/new/bot
 var slack = require('@slack/client')
@@ -40,7 +41,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function(msg) {
       login(msg, cmd)
     } else if (cmd[1] === 'track') {
       trackMessage(msg, cmd)
-    } else if (/^(yesterday|today)$/.test(cmd[0]) || Date.parse(cmd[0])) {
+    } else if (parseDateInput.isDate(cmd[0])) {
       changeDate(msg, cmd[0])
     } else if (/^projects?$/.test(cmd[1])) {
       listProjects(msg)
@@ -99,17 +100,12 @@ function help (msg) {
 }
 
 function changeDate (msg, date) {
-  if (date === 'today') date = undefined
-  else if (date === 'yesterday') date = new Date(Date.now() - (3600 * 1000 * 24))
-  else date = new Date(date)
+  var parsedDate = parseDateInput(date)
+  if (!parsedDate) delete dates[msg.user]
+  else dates[msg.user] = parsedDate
 
-  if (!date) {
-    delete dates[msg.user]
-    postMessage(msg.user, `Changed date to today`)
-  } else {
-    dates[msg.user] = date
-    postMessage(msg.user, `Changed date to ${date.toISOString()}`)
-  }
+  if (/^(yesterday|today)$/.test(date)) postMessage(msg.user, `Changed date to ` + date)
+  else postMessage(msg.user, `Changed date to ${parsedDate.toISOString()}`)
 }
 
 function listProjects (msg) {

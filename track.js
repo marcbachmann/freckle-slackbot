@@ -1,4 +1,4 @@
-var parser = require('./parser')
+var parser = require('./parse-tracking-input')
 
 module.exports = function (entries, projects) {
   return function track (cmd, cb) {
