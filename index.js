@@ -17,7 +17,7 @@ var CLIENT_EVENTS = slack.CLIENT_EVENTS
 var MemoryDataStore = slack.MemoryDataStore
 var rtm = new RtmClient(SLACK_TOKEN, {logLevel: 'error', dataStore: new MemoryDataStore()})
 var logins = {}
-var dates= {}
+var dates = {}
 
 function postMessage (target, msg) {
   if (Array.isArray(msg)) msg = msg.join('\n')
@@ -31,19 +31,19 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (data) {
   console.log(`Logged in as ${data.self.name} of team ${data.team.name}`)
 })
 
-rtm.on(RTM_EVENTS.MESSAGE, function(msg) {
+rtm.on(RTM_EVENTS.MESSAGE, function (msg) {
   if (msg.subtype) return
 
   _.each(msg.text.split('\n'), function (text) {
     var cmd = /^([^ ]*)( .*)?/.exec(text)
 
-    if (cmd[1] === 'login') {
+    if (/^login$/i.test(cmd[1])) {
       login(msg, cmd)
-    } else if (cmd[1] === 'track') {
+    } else if (/^track/i.test(cmd[1])) {
       trackMessage(msg, cmd)
     } else if (parseDateInput.isDate(cmd[0])) {
       changeDate(msg, cmd[0])
-    } else if (/^projects?$/.test(cmd[1])) {
+    } else if (/^projects?$/i.test(cmd[1])) {
       listProjects(msg)
     } else {
       help(msg)
